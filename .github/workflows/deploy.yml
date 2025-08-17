@@ -1,0 +1,21 @@
+name: Deploy to GKE
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'kubernetes/**', 'app/**' ]
+
+jobs:
+  deploy:
+    runs-on: self-hosted  # Uses self-hosted runner
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Configure GKE credentials
+      run: |-
+        gcloud auth activate-service-account --key-file=${{ secrets.GCP_SA_KEY }}
+        gcloud container clusters get-credentials github-demo-cluster --region=us-central1
+
+    - name: Deploy to GKE
+      run: kubectl apply -f kubernetes/deployment.yaml
